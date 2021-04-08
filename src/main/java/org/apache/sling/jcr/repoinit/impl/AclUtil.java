@@ -221,10 +221,7 @@ public class AclUtil {
                         // no PrincipalAccessControlList available: don't fail if an equivalent path-based entry with the same definition exists
                         // or if there exists no node at the effective path (unable to evaluate path-based entries).
                         LOG.info("No PrincipalAccessControlList available for principal {}", principal);
-                        if (!containsEquivalentEntry(session, effectivePath, principal, privileges, true, line.getRestrictions())) {
-                            LOG.warn("No equivalent path-based entry exists for principal {} and effective path {} ", principal.getName(), effectivePath);
-                            return;
-                        }
+                        checkState(containsEquivalentEntry(session, effectivePath, principal, privileges, true, line.getRestrictions()), "No PrincipalAccessControlList available for principal '" + principal + "'.");
                     } else {
                         final LocalRestrictions restrictions = createLocalRestrictions(line.getRestrictions(), acl, session);
                         final boolean added = acl.addEntry(effectivePath, privileges, restrictions.getRestrictions(), restrictions.getMVRestrictions());
