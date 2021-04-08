@@ -456,7 +456,7 @@ public class PrincipalBasedAclTest {
         assertEquals(2, pacl.size());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void  principalAclNotAvailable() throws Exception {
         try {
             // create service user outside of supported tree for principal-based access control
@@ -465,13 +465,18 @@ public class PrincipalBasedAclTest {
             String setup = "set principal ACL for otherSystemPrincipal \n"
                             + "allow jcr:read on " + path + "\n"
                             + "end";
-            U.parseAndExecute(setup);
+            try {
+                U.parseAndExecute(setup);
+                fail("Setting a principal ACL outside a supported path must not succeed");
+            } catch (RuntimeException e) {
+                // expected
+            }
         } finally {
             U.cleanupServiceUser("otherSystemPrincipal");
         }
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void  principalAclNotAvailableRestrictionMismatch() throws Exception {
         JackrabbitAccessControlManager acMgr = (JackrabbitAccessControlManager) adminSession.getAccessControlManager();
         try {
@@ -491,7 +496,12 @@ public class PrincipalBasedAclTest {
             setup = "set principal ACL for otherSystemPrincipal \n"
                     + "allow jcr:read on " + path + " restriction(rep:glob,*mismatch)\n"
                     + "end";
-            U.parseAndExecute(setup);
+            try {
+                U.parseAndExecute(setup);
+                fail("Setting a principal ACL outside a supported path must not succeed");
+            } catch (RuntimeException e) {
+                // expected
+            }
         } finally {
             U.cleanupServiceUser("otherSystemPrincipal");
         }
@@ -513,14 +523,14 @@ public class PrincipalBasedAclTest {
             assertTrue(acMgr.hasPrivileges(path, Collections.singleton(principal), AccessControlUtils.privilegesFromNames(adminSession, Privilege.JCR_READ)));
 
             // setting up principal-acl will not succeed (principal not located below supported path)
-            // but there exists an effective entry with the same definition -> no exception
             setup = "set principal ACL for otherSystemPrincipal \n"
                     + "allow jcr:read on " + path + "\n"
                     + "end";
-            U.parseAndExecute(setup);
-
-            for (AccessControlPolicy policy : acMgr.getPolicies(principal)) {
-                assertFalse(policy instanceof PrincipalAccessControlList);
+            try {
+                U.parseAndExecute(setup);
+                fail("Setting a principal ACL outside a supported path must not succeed");
+            } catch (RuntimeException e) {
+                // expected
             }
         } finally {
             U.cleanupServiceUser("otherSystemPrincipal");
@@ -540,15 +550,14 @@ public class PrincipalBasedAclTest {
             U.parseAndExecute(setup);
 
             // setting up principal-acl will not succeed (principal not located below supported path)
-            // but there exists an equivalent entry with the same definition -> no exception
             setup = "set principal ACL for otherSystemPrincipal \n"
                     + "allow jcr:read on " + path + " restriction(rep:glob,*abc*)\n"
                     + "end";
-            U.parseAndExecute(setup);
-
-            Principal principal = adminSession.getUserManager().getAuthorizable("otherSystemPrincipal").getPrincipal();
-            for (AccessControlPolicy policy : acMgr.getPolicies(principal)) {
-                assertFalse(policy instanceof PrincipalAccessControlList);
+            try {
+                U.parseAndExecute(setup);
+                fail("Setting a principal ACL outside a supported path must not succeed");
+            } catch (RuntimeException e) {
+                // expected
             }
         } finally {
             U.cleanupServiceUser("otherSystemPrincipal");
@@ -568,16 +577,16 @@ public class PrincipalBasedAclTest {
             U.parseAndExecute(setup);
 
             // setting up principal-acl will not succeed (principal not located below supported path)
-            // but there exists an equivalent entry with the same definition -> no exception
             setup = "set principal ACL for otherSystemPrincipal \n"
                     + "allow jcr:namespaceManagement on :repository\n"
                     + "end";
-            U.parseAndExecute(setup);
-
-            Principal principal = adminSession.getUserManager().getAuthorizable("otherSystemPrincipal").getPrincipal();
-            for (AccessControlPolicy policy : acMgr.getPolicies(principal)) {
-                assertFalse(policy instanceof PrincipalAccessControlList);
+            try {
+                U.parseAndExecute(setup);
+                fail("Setting a principal ACL outside a supported path must not succeed");
+            } catch (RuntimeException e) {
+                // expected
             }
+
         } finally {
             U.cleanupServiceUser("otherSystemPrincipal");
         }
@@ -591,17 +600,17 @@ public class PrincipalBasedAclTest {
             U.parseAndExecute("create service user otherSystemPrincipal");
 
             // setting up principal-acl will not succeed (principal not located below supported path)
-            // but since the target node does not exist we cannot verify if an equivalent resource-based ac-setup exists
-            // (AccessControlManager.getPolicies would fail with PathNotFoundException) => relaxed behavior (SLING-9412)
+           
             String setup = "set principal ACL for otherSystemPrincipal \n"
                     + "allow jcr:read on /non/existing/path\n"
                     + "end";
-            U.parseAndExecute(setup);
-
-            Principal principal = adminSession.getUserManager().getAuthorizable("otherSystemPrincipal").getPrincipal();
-            for (AccessControlPolicy policy : acMgr.getPolicies(principal)) {
-                assertFalse(policy instanceof PrincipalAccessControlList);
+            try {
+                U.parseAndExecute(setup);
+                fail("Setting a principal ACL outside a supported path must not succeed");
+            } catch (RuntimeException e) {
+                // expected
             }
+
         } finally {
             U.cleanupServiceUser("otherSystemPrincipal");
         }
@@ -720,7 +729,7 @@ public class PrincipalBasedAclTest {
             U.parseAndExecute(setup);
             fail("Expecting REMOVE to fail");
         } catch(RuntimeException rex) {
-            assertRegex(REMOVE_NOT_SUPPORTED_REGEX, rex.getMessage());
+            // expected
         }
     }
 
@@ -855,7 +864,12 @@ public class PrincipalBasedAclTest {
         setup = "set principal ACL for otherSystemPrincipal\n"
                 + "remove * on " + path + "\n"
                 + "end";
-        U.parseAndExecute(setup);
+        try {
+            U.parseAndExecute(setup);
+            fail("Setting a principal ACL outside a supported path must not succeed");
+        } catch (RuntimeException e) {
+            // expected
+        }
     }
 
     @Test

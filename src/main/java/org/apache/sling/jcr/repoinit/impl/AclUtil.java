@@ -203,6 +203,7 @@ public class AclUtil {
         }
 
         final PrincipalAccessControlList acl = getPrincipalAccessControlList(acMgr, principal);
+        checkState(acl != null, "No PrincipalAccessControlList available for principal '" + principal + "'."); 
         boolean modified = false;
         for (AclLine line : lines) {
             AclLine.Action action = line.getAction();
@@ -217,19 +218,12 @@ public class AclUtil {
             } else if (action == AclLine.Action.ALLOW) {
                 final Privilege[] privileges = AccessControlUtils.privilegesFromNames(session, line.getProperty(PROP_PRIVILEGES).toArray(new String[0]));
                 for (String effectivePath : getJcrPaths(session, line.getProperty(PROP_PATHS))) {
-                    if (acl == null) {
-                        // no PrincipalAccessControlList available: don't fail if an equivalent path-based entry with the same definition exists
-                        // or if there exists no node at the effective path (unable to evaluate path-based entries).
-                        LOG.info("No PrincipalAccessControlList available for principal {}", principal);
-                        checkState(containsEquivalentEntry(session, effectivePath, principal, privileges, true, line.getRestrictions()), "No PrincipalAccessControlList available for principal '" + principal + "'.");
+                    final LocalRestrictions restrictions = createLocalRestrictions(line.getRestrictions(), acl, session);
+                    final boolean added = acl.addEntry(effectivePath, privileges, restrictions.getRestrictions(), restrictions.getMVRestrictions());
+                    if (!added) {
+                        LOG.info("Equivalent principal-based entry already exists for principal {} and effective path {} ", principalName, effectivePath);
                     } else {
-                        final LocalRestrictions restrictions = createLocalRestrictions(line.getRestrictions(), acl, session);
-                        final boolean added = acl.addEntry(effectivePath, privileges, restrictions.getRestrictions(), restrictions.getMVRestrictions());
-                        if (!added) {
-                            LOG.info("Equivalent principal-based entry already exists for principal {} and effective path {} ", principalName, effectivePath);
-                        } else {
-                            modified = true;
-                        }
+                        modified = true;
                     }
                 }
             } else {
