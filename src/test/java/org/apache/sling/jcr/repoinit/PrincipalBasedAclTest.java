@@ -77,6 +77,7 @@ public class PrincipalBasedAclTest {
 
     private static final String PRINCIPAL_BASED_SUBTREE = "principalbased";
     private static final String REMOVE_NOT_SUPPORTED_REGEX = ".*REMOVE[a-zA-Z ]+not supported.*";
+    private static final String NO_PRINCIPAL_CONTROL_LIST_AVAILABLE = ".*No PrincipalAccessControlList available.*";
 
     @Rule
     public final OsgiContext context = new OsgiContext();
@@ -469,7 +470,7 @@ public class PrincipalBasedAclTest {
                 U.parseAndExecute(setup);
                 fail("Setting a principal ACL outside a supported path must not succeed");
             } catch (RuntimeException e) {
-                // expected
+                assertRegex(NO_PRINCIPAL_CONTROL_LIST_AVAILABLE, e.getMessage());
             }
         } finally {
             U.cleanupServiceUser("otherSystemPrincipal");
@@ -500,7 +501,7 @@ public class PrincipalBasedAclTest {
                 U.parseAndExecute(setup);
                 fail("Setting a principal ACL outside a supported path must not succeed");
             } catch (RuntimeException e) {
-                // expected
+                assertRegex(NO_PRINCIPAL_CONTROL_LIST_AVAILABLE, e.getMessage());
             }
         } finally {
             U.cleanupServiceUser("otherSystemPrincipal");
@@ -530,7 +531,7 @@ public class PrincipalBasedAclTest {
                 U.parseAndExecute(setup);
                 fail("Setting a principal ACL outside a supported path must not succeed");
             } catch (RuntimeException e) {
-                // expected
+                assertRegex(NO_PRINCIPAL_CONTROL_LIST_AVAILABLE, e.getMessage());
             }
         } finally {
             U.cleanupServiceUser("otherSystemPrincipal");
@@ -557,7 +558,7 @@ public class PrincipalBasedAclTest {
                 U.parseAndExecute(setup);
                 fail("Setting a principal ACL outside a supported path must not succeed");
             } catch (RuntimeException e) {
-                // expected
+                assertRegex(NO_PRINCIPAL_CONTROL_LIST_AVAILABLE, e.getMessage());
             }
         } finally {
             U.cleanupServiceUser("otherSystemPrincipal");
@@ -584,7 +585,7 @@ public class PrincipalBasedAclTest {
                 U.parseAndExecute(setup);
                 fail("Setting a principal ACL outside a supported path must not succeed");
             } catch (RuntimeException e) {
-                // expected
+                assertRegex(NO_PRINCIPAL_CONTROL_LIST_AVAILABLE, e.getMessage());
             }
 
         } finally {
@@ -608,7 +609,7 @@ public class PrincipalBasedAclTest {
                 U.parseAndExecute(setup);
                 fail("Setting a principal ACL outside a supported path must not succeed");
             } catch (RuntimeException e) {
-                // expected
+                assertRegex(NO_PRINCIPAL_CONTROL_LIST_AVAILABLE, e.getMessage());
             }
 
         } finally {
@@ -729,7 +730,7 @@ public class PrincipalBasedAclTest {
             U.parseAndExecute(setup);
             fail("Expecting REMOVE to fail");
         } catch(RuntimeException rex) {
-            // expected
+            assertRegex(NO_PRINCIPAL_CONTROL_LIST_AVAILABLE, rex.getMessage());
         }
     }
 
@@ -868,7 +869,7 @@ public class PrincipalBasedAclTest {
             U.parseAndExecute(setup);
             fail("Setting a principal ACL outside a supported path must not succeed");
         } catch (RuntimeException e) {
-            // expected
+            assertRegex(NO_PRINCIPAL_CONTROL_LIST_AVAILABLE, e.getMessage());
         }
     }
 
