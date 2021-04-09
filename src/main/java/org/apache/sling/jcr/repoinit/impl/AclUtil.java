@@ -41,6 +41,7 @@ import org.apache.jackrabbit.api.security.JackrabbitAccessControlEntry;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlList;
 import org.apache.jackrabbit.api.security.JackrabbitAccessControlManager;
 import org.apache.jackrabbit.api.security.authorization.PrincipalAccessControlList;
+import org.apache.jackrabbit.api.security.principal.ItemBasedPrincipal;
 import org.apache.jackrabbit.api.security.user.Authorizable;
 import org.apache.jackrabbit.commons.jackrabbit.authorization.AccessControlUtils;
 import org.apache.jackrabbit.util.Text;
@@ -203,7 +204,14 @@ public class AclUtil {
         }
 
         final PrincipalAccessControlList acl = getPrincipalAccessControlList(acMgr, principal);
-        checkState(acl != null, "No PrincipalAccessControlList available for principal '" + principal + "'."); 
+        if (acl == null) {
+            String principalDescription = principal.getName();
+            // try to get path of principal in case it is backed by a JCR user/group
+            if (principal instanceof ItemBasedPrincipal) {
+                principalDescription += " (" + ((ItemBasedPrincipal) principal).getPath() + ")";
+            }
+            throw new IllegalStateException("No PrincipalAccessControlList available for principal '" + principalDescription + "'.");
+        }
         boolean modified = false;
         for (AclLine line : lines) {
             AclLine.Action action = line.getAction();
