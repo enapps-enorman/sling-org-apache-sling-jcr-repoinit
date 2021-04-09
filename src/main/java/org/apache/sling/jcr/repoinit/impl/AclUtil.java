@@ -313,24 +313,6 @@ public class AclUtil {
         return paths;
     }
 
-    private static boolean containsEquivalentEntry(Session session, String absPath, Principal principal, Privilege[] privileges, boolean isAllow, List<RestrictionClause> restrictionList) throws RepositoryException {
-        if (absPath != null && !session.nodeExists(absPath)) {
-            LOG.info("Cannot determine existence of equivalent path-based entry for principal {}. No node at path {} ", principal.getName(), absPath);
-            return true;
-        }
-        for (AccessControlPolicy policy : session.getAccessControlManager().getPolicies(absPath)) {
-            if (policy instanceof JackrabbitAccessControlList) {
-                LocalRestrictions lr = createLocalRestrictions(restrictionList, ((JackrabbitAccessControlList) policy), session);
-                LocalAccessControlEntry newEntry = new LocalAccessControlEntry(principal, privileges, isAllow, lr);
-                if (contains(((JackrabbitAccessControlList) policy).getAccessControlEntries(), newEntry)) {
-                    LOG.info("Equivalent path-based entry exists for principal {} and effective path {} ", newEntry.principal.getName(), absPath);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     // visible for testing
     static boolean contains(AccessControlEntry[] existingAces, LocalAccessControlEntry newAce) throws RepositoryException {
         for (int i = 0 ; i < existingAces.length; i++) {
