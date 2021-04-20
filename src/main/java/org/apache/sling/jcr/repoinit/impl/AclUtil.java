@@ -243,7 +243,14 @@ public class AclUtil {
         }
     }
 
-    private static PrincipalAccessControlList getPrincipalAccessControlList(JackrabbitAccessControlManager acMgr, Principal principal) throws RepositoryException {
+    /**
+     * 
+     * @param acMgr the access control manager
+     * @param principal the principal
+     * @return the first available {@link PrincipalAccessControlList} bound to the given principal or {@code null} of <a href="https://jackrabbit.apache.org/oak/docs/security/authorization/principalbased.html">principal-based authorization</a> is not enabled for the given principal
+     * @throws RepositoryException
+     */
+    private static @Nullable PrincipalAccessControlList getPrincipalAccessControlList(JackrabbitAccessControlManager acMgr, Principal principal) throws RepositoryException {
         PrincipalAccessControlList acl = null;
         for (AccessControlPolicy policy : acMgr.getPolicies(principal)) {
             if (policy instanceof PrincipalAccessControlList) {
