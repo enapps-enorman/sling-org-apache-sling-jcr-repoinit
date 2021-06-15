@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
 import org.apache.sling.commons.testing.jcr.RepositoryUtil;
@@ -29,6 +30,9 @@ import org.apache.sling.testing.mock.sling.junit.SlingContext;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /** Test the creation of paths with specific node types */
 public class CreatePathsTest {
@@ -123,5 +127,27 @@ public class CreatePathsTest {
         U.assertNodeExists("/thirteen", "nt:unstructured", Collections.<String>emptyList());
         U.assertNodeExists("/thirteen/fourteen", "nt:unstructured", Collections.singletonList("mix:lockable"));
         U.assertNodeExists("/thirteen/fourteen/fifteen", "nt:unstructured", Collections.singletonList("mix:lockable"));
+    }
+    
+    @Test
+    public void createPathNoDefaultPrimaryType() throws Exception {
+        U.adminSession.getRootNode().addNode("folder", "nt:folder");
+        U.parseAndExecute("create path /folder/subfolder/subfolder2");
+        
+        Node subFolder = U.adminSession.getNode("/folder/subfolder");
+        assertEquals("sling:Folder", subFolder.getPrimaryNodeType().getName());
+
+        Node subFolder2 = subFolder.getNode("subfolder2");
+        assertEquals("sling:Folder", subFolder2.getPrimaryNodeType().getName());
+    }
+
+    @Test
+    public void createPathWherePropertyExists() throws Exception {
+        final Node folder = U.adminSession.getRootNode().addNode("cpwpe", "nt:unstructured");
+        folder.setProperty("nodeOrProperty", "someValue");
+        folder.getSession().save();
+        final String fullPath = "/cpwpe/nodeOrProperty";
+        U.parseAndExecute("create path " + fullPath);
+        assertTrue(U.adminSession.propertyExists(fullPath));
     }
 }
